@@ -37,7 +37,7 @@ sealed interface DashboardUiState {
 class DashboardViewModel(
     val scanManuscriptUseCase: ScanManuscriptUseCase,
     private val sessionManager: SessionManager,
-    private val workManager: WorkManager
+    private val workManager: WorkManager? = null
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<ScanUiState>(ScanUiState.Idle)

@@ -9,17 +9,17 @@ class ResyncApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         
-        // Enable verbose OneSignal logging to aid in diagnostics
-        OneSignal.Debug.logLevel = LogLevel.VERBOSE
+        // Initialize OneSignal only if a valid UUID App ID is configured
+        val oneSignalAppId = "" // Set to real OneSignal UUID in production
         
-        // Initialize OneSignal with a secure or configured app ID
-        val oneSignalAppId = "resync-companion-app-id-2026" // In a production app, loaded securely
-        
-        try {
-            OneSignal.initWithContext(this, oneSignalAppId)
-            Log.d("ResyncApplication", "OneSignal initialized successfully with App ID: $oneSignalAppId")
-        } catch (e: Exception) {
-            Log.e("ResyncApplication", "Failed to initialize OneSignal: ${e.message}", e)
+        if (oneSignalAppId.isNotBlank()) {
+            try {
+                OneSignal.Debug.logLevel = LogLevel.VERBOSE
+                OneSignal.initWithContext(this, oneSignalAppId)
+                Log.d("ResyncApplication", "OneSignal initialized successfully with App ID: $oneSignalAppId")
+            } catch (e: Throwable) {
+                Log.e("ResyncApplication", "Failed to initialize OneSignal: ${e.message}", e)
+            }
         }
     }
 }

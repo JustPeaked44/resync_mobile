@@ -39,8 +39,14 @@ class MainActivity : ComponentActivity() {
         val repository = ScanRepositoryImpl(apiService)
         val scanManuscriptUseCase = ScanManuscriptUseCase(repository)
         
+        val workManager = try {
+            androidx.work.WorkManager.getInstance(applicationContext)
+        } catch (e: Throwable) {
+            null
+        }
+
         // Manual constructor injection of dependencies into ViewModel
-        val dashboardViewModel = DashboardViewModel(scanManuscriptUseCase, sessionManager, androidx.work.WorkManager.getInstance(applicationContext))
+        val dashboardViewModel = DashboardViewModel(scanManuscriptUseCase, sessionManager, workManager)
         val splashViewModel = SplashViewModel(sessionManager)
         val authViewModel = AuthViewModel(apiService, sessionManager)
         val onboardingViewModel = OnboardingViewModel(sessionManager)
