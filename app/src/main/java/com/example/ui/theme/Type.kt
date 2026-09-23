@@ -9,38 +9,10 @@ import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.unit.sp
 import com.example.R
 
-// Google Fonts Provider Setup
-private val provider = GoogleFont.Provider(
-    "com.google.android.gms.fonts",
-    "com.google.android.gms",
-    R.array.com_google_android_gms_fonts_certs
-)
-
-// Font Definitions
-private val PlayfairDisplayFont = GoogleFont("Playfair Display")
-private val PlusJakartaSansFont = GoogleFont("Plus Jakarta Sans")
-private val JetBrainsMonoFont = GoogleFont("JetBrains Mono")
-
 // Font Families
-val PlayfairDisplayFontFamily = FontFamily(
-    Font(googleFont = PlayfairDisplayFont, fontProvider = provider),
-    Font(googleFont = PlayfairDisplayFont, fontProvider = provider, weight = FontWeight.Medium),
-    Font(googleFont = PlayfairDisplayFont, fontProvider = provider, weight = FontWeight.SemiBold),
-    Font(googleFont = PlayfairDisplayFont, fontProvider = provider, weight = FontWeight.Bold)
-)
-
-val PlusJakartaSansFontFamily = FontFamily(
-    Font(googleFont = PlusJakartaSansFont, fontProvider = provider),
-    Font(googleFont = PlusJakartaSansFont, fontProvider = provider, weight = FontWeight.Medium),
-    Font(googleFont = PlusJakartaSansFont, fontProvider = provider, weight = FontWeight.SemiBold),
-    Font(googleFont = PlusJakartaSansFont, fontProvider = provider, weight = FontWeight.Bold)
-)
-
-val JetBrainsMonoFontFamily = FontFamily(
-    Font(googleFont = JetBrainsMonoFont, fontProvider = provider),
-    Font(googleFont = JetBrainsMonoFont, fontProvider = provider, weight = FontWeight.Medium),
-    Font(googleFont = JetBrainsMonoFont, fontProvider = provider, weight = FontWeight.Bold)
-)
+val PlayfairDisplayFontFamily = FontFamily.Serif
+val PlusJakartaSansFontFamily = FontFamily.SansSerif
+val JetBrainsMonoFontFamily = FontFamily.Monospace
 
 // Material 3 Typography Definition with the requested fonts
 val Typography = Typography(
