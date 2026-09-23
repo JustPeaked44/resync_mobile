@@ -30,8 +30,8 @@ class SplashViewModel(
 
     private fun checkSession() {
         viewModelScope.launch {
-            // Keep splash visible for a minimum duration to show branding
-            delay(1500)
+            // Keep splash visible for a duration to show full brand animation
+            delay(2700)
             val hasCompletedOnboarding = sessionManager.hasCompletedOnboarding.first()
             if (!hasCompletedOnboarding) {
                 _splashState.value = SplashState.NavigateToOnboarding
