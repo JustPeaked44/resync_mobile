@@ -55,6 +55,8 @@ import com.example.ui.theme.PlayfairDisplayFontFamily
 import com.example.ui.theme.PlusJakartaSansFontFamily
 import kotlinx.coroutines.launch
 
+import com.example.presentation.common.ResyncSymbol
+
 data class OnboardingPageData(
     val eyebrow: String,
     val title: String,
@@ -158,11 +160,7 @@ fun LandingScreen(
                                 ),
                             contentAlignment = Alignment.Center
                         ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.resynce_logo),
-                                contentDescription = "Logo",
-                                modifier = Modifier.size(22.dp)
-                            )
+                            ResyncSymbol(size = 20.dp)
                         }
                         Text(
                             text = "Resync",

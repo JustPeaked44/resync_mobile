@@ -48,8 +48,7 @@ fun SplashScreen(
         contentAlignment = Alignment.Center
     ) {
         ResyncAnimatedLogo(
-            logoWidth = 250.dp,
-            logoHeight = 115.dp
+            logoHeight = 135.dp
         )
     }
 }
