@@ -53,8 +53,6 @@ import androidx.compose.ui.unit.sp
 import com.example.R
 import com.example.ui.theme.PlayfairDisplayFontFamily
 import com.example.ui.theme.PlusJakartaSansFontFamily
-import kotlinx.coroutines.launch
-
 import com.example.presentation.common.ResyncSymbol
 
 data class OnboardingPageData(

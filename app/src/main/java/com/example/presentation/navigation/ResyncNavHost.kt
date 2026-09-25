@@ -69,6 +69,11 @@ fun ResyncNavHost(
                     navController.navigate(Screen.DashboardHost.route) {
                         popUpTo(Screen.Auth.route) { inclusive = true }
                     }
+                },
+                onNavigateBack = {
+                    navController.navigate(Screen.Onboarding.route) {
+                        popUpTo(Screen.Auth.route) { inclusive = true }
+                    }
                 }
             )
         }

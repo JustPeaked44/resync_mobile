@@ -47,7 +47,7 @@ val ResyncBrandBlue = Color(0xFF0010A8)
 fun ResyncAnimatedLogo(
     modifier: Modifier = Modifier,
     logoWidth: Dp? = null,
-    logoHeight: Dp = 140.dp,
+    logoHeight: Dp = 220.dp,
     onAnimationFinish: () -> Unit = {}
 ) {
     val painter = painterResource(id = R.drawable.resynce_logo)
