@@ -48,7 +48,10 @@ fun SplashScreen(
         contentAlignment = Alignment.Center
     ) {
         ResyncAnimatedLogo(
-            logoHeight = 220.dp
+            logoHeight = 220.dp,
+            onAnimationFinish = {
+                onNavigate("onboarding")
+            }
         )
     }
 }

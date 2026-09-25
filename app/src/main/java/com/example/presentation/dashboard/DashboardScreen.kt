@@ -1,25 +1,42 @@
 package com.example.presentation.dashboard
 
+import android.widget.Toast
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.Warning
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -27,21 +44,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.data.remote.dto.LinkStatus
-import com.example.data.remote.dto.ScanResponse
-import com.example.ui.theme.ButtonShape
-import com.example.ui.theme.CardShape
 import com.example.ui.theme.PlayfairDisplayFontFamily
 import com.example.ui.theme.PlusJakartaSansFontFamily
-import com.example.ui.theme.JetBrainsMonoFontFamily
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DashboardScreen(
     viewModel: DashboardViewModel,
@@ -51,578 +68,860 @@ fun DashboardScreen(
     onNavigateToHistory: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     val uiState by viewModel.dashboardUiState.collectAsState()
+    val scrollState = rememberScrollState()
 
-    // Load data when screen enters composition
     LaunchedEffect(Unit) {
         viewModel.fetchDashboardData()
     }
 
-    Scaffold(
-        modifier = modifier.fillMaxSize().testTag("dashboard_screen"),
-        topBar = {
-            TopAppBar(
-                title = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.padding(start = 4.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Star,
-                            contentDescription = "Resync Logo",
-                            tint = Color(0xFF4F46E5), // Resync Indigo
-                            modifier = Modifier.size(26.dp)
-                        )
-                        Text(
-                            text = "Resync",
-                            fontFamily = PlayfairDisplayFontFamily,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 22.sp,
-                            color = Color(0xFF0F172A)
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(
-                        onClick = onNavigateToSettings,
-                        modifier = Modifier.testTag("dashboard_settings_button")
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Settings",
-                            tint = Color(0xFF64748B)
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFFF8FAFC)
-                )
-            )
-        },
-        containerColor = Color(0xFFF8FAFC)
-    ) { innerPadding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) {
-            when (val state = uiState) {
-                is DashboardUiState.Loading -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(
-                            color = Color(0xFF4F46E5)
-                        )
-                    }
-                }
-                is DashboardUiState.Empty -> {
-                    EmptyStateView(
-                        onNavigateToNewScan = onNavigateToNewScan
-                    )
-                }
-                is DashboardUiState.Success -> {
-                    SuccessStateView(
-                        lastScan = state.lastScan,
-                        history = state.history,
-                        onNavigateToDetails = onNavigateToDetails,
-                        onNavigateToHistory = onNavigateToHistory
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun EmptyStateView(
-    onNavigateToNewScan: () -> Unit,
-    modifier: Modifier = Modifier
-) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp)
-    ) {
-        // Hero Card
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .border(1.dp, Color(0xFFE2E8F0), CardShape)
-                .testTag("empty_hero_card"),
-            shape = CardShape,
-            color = Color.White
-        ) {
-            Column(
-                modifier = Modifier.padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(64.dp)
-                        .clip(CircleShape)
-                        .background(Color(0xFF4F46E5).copy(alpha = 0.08f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Star,
-                        contentDescription = "Sparkle Icon",
-                        tint = Color(0xFF4F46E5),
-                        modifier = Modifier.size(32.dp)
-                    )
-                }
-
-                Text(
-                    text = "Scan your first chapter",
-                    fontFamily = PlayfairDisplayFontFamily,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
-                    color = Color(0xFF0F172A),
-                    textAlign = TextAlign.Center
-                )
-
-                Text(
-                    text = "You have not yet analyzed a manuscript. Submit a Google Docs document link to receive a detailed coherence check, find logical contradictions, and validate citations automatically.",
-                    fontFamily = PlusJakartaSansFontFamily,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 14.sp,
-                    color = Color(0xFF64748B),
-                    textAlign = TextAlign.Center,
-                    lineHeight = 20.sp
-                )
-            }
-        }
-
-        // Disabled Summary Cards Title
-        Text(
-            text = "Manuscript Metrics",
-            fontFamily = PlusJakartaSansFontFamily,
-            fontWeight = FontWeight.Bold,
-            fontSize = 15.sp,
-            color = Color(0xFF94A3B8)
-        )
-
-        // Three Disabled Cards Row
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            DisabledSummaryCard(
-                title = "Integrity Score",
-                value = "— / 100",
-                modifier = Modifier.weight(1f).testTag("inactive_integrity_card")
-            )
-            DisabledSummaryCard(
-                title = "Issues Flagged",
-                value = "—",
-                modifier = Modifier.weight(1f).testTag("inactive_issues_card")
-            )
-            DisabledSummaryCard(
-                title = "Citations Checked",
-                value = "—",
-                modifier = Modifier.weight(1f).testTag("inactive_citations_card")
-            )
-        }
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        // Full-width primary button
-        Button(
-            onClick = onNavigateToNewScan,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp)
-                .testTag("upload_chapter_button"),
-            shape = ButtonShape,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF4F46E5),
-                contentColor = Color.White
-            )
-        ) {
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = "Upload Icon",
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = "Upload a chapter to begin",
-                fontFamily = PlusJakartaSansFontFamily,
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp
-            )
-        }
-    }
-}
-
-@Composable
-fun DisabledSummaryCard(
-    title: String,
-    value: String,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        modifier = modifier
-            .border(1.dp, Color(0xFFE2E8F0).copy(alpha = 0.5f), CardShape),
-        shape = CardShape,
-        color = Color(0xFFF1F5F9).copy(alpha = 0.5f)
-    ) {
-        Column(
-            modifier = Modifier.padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            Text(
-                text = title.uppercase(),
-                fontFamily = PlusJakartaSansFontFamily,
-                fontWeight = FontWeight.Bold,
-                fontSize = 10.sp,
-                color = Color(0xFF94A3B8),
-                letterSpacing = 0.5.sp
-            )
-            Text(
-                text = value,
-                fontFamily = JetBrainsMonoFontFamily,
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
-                color = Color(0xFFCBD5E1)
-            )
-        }
-    }
-}
-
-@Composable
-fun SuccessStateView(
-    lastScan: ScanResponse,
-    history: List<ScanResponse>,
-    onNavigateToDetails: (Int, String, List<String>) -> Unit,
-    onNavigateToHistory: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(20.dp),
+            .background(Color(0xFFF8FAFC))
+            .verticalScroll(scrollState)
+            .statusBarsPadding()
+            .padding(horizontal = 20.dp, vertical = 14.dp)
+            .testTag("dashboard_screen"),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        // Top Results Card
-        Surface(
+        // =====================================================================
+        // 1. TOP GREETING & CREDITS BADGE
+        // =====================================================================
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .border(1.dp, Color(0xFFE2E8F0), CardShape)
-                .testTag("results_card"),
-            shape = CardShape,
-            color = Color.White
+                .padding(top = 4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(
+                    text = "GOOD MORNING",
+                    color = Color(0xFF64748B),
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = 0.8.sp,
+                    fontFamily = PlusJakartaSansFontFamily
+                )
+                Text(
+                    text = "Welcome back, Juan.",
+                    color = Color(0xFF0F172A),
+                    fontSize = 23.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = PlayfairDisplayFontFamily
+                )
+            }
+
+            // Credits Badge Pill
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color(0xFF2563EB))
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                contentAlignment = Alignment.Center
             ) {
-                // Header Area with Circular Score & Meta Text
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = "★",
+                        color = Color.White,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "3 Credits",
+                        color = Color.White,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = PlusJakartaSansFontFamily
+                    )
+                }
+            }
+        }
+
+        // =====================================================================
+        // 2. HERO BLUE CARD: "Your manuscript, checked end-to-end."
+        // =====================================================================
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(24.dp))
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color(0xFF2563EB),
+                            Color(0xFF1D4ED8)
+                        )
+                    )
+                )
+                .padding(20.dp)
+        ) {
+            // Ambient decorative background circle
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                drawCircle(
+                    color = Color.White.copy(alpha = 0.08f),
+                    radius = 120.dp.toPx(),
+                    center = Offset(size.width * 0.9f, 20.dp.toPx())
+                )
+            }
+
+            Column(
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                // Top Tag Pill
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color.White.copy(alpha = 0.18f))
+                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                ) {
+                    Text(
+                        text = "• AI-powered · ~2 minutes",
+                        color = Color.White,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        fontFamily = PlusJakartaSansFontFamily
+                    )
+                }
+
+                // Card Heading
+                Text(
+                    text = "Your manuscript,\nchecked end-to-end.",
+                    color = Color.White,
+                    fontSize = 21.sp,
+                    lineHeight = 27.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = PlayfairDisplayFontFamily
+                )
+
+                // Card Subtitle
+                Text(
+                    text = "Logic gaps · contradictions · redundancies · dead citations — all in a single pass.",
+                    color = Color.White.copy(alpha = 0.88f),
+                    fontSize = 12.sp,
+                    lineHeight = 17.sp,
+                    fontFamily = PlusJakartaSansFontFamily
+                )
+
+                // Actions Row: Start a scan button + Preview sample link
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
-                    // Circular score indicator
-                    val progressColor = when {
-                        lastScan.coherenceScore >= 80 -> Color(0xFF10B981) // Success Emerald
-                        lastScan.coherenceScore >= 50 -> Color(0xFFF59E0B) // Warning Amber
-                        else -> Color(0xFFF43F5E) // Error Rose
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .size(72.dp)
-                            .testTag("score_indicator"),
-                        contentAlignment = Alignment.Center
+                    Button(
+                        onClick = onNavigateToNewScan,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.White,
+                            contentColor = Color(0xFF0F172A)
+                        ),
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 14.dp, vertical = 8.dp),
+                        modifier = Modifier.height(40.dp)
                     ) {
-                        CircularProgressIndicator(
-                            progress = lastScan.coherenceScore / 100f,
-                            color = progressColor,
-                            trackColor = Color(0xFFF1F5F9),
-                            strokeWidth = 6.dp,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
                             Text(
-                                text = "${lastScan.coherenceScore}",
-                                fontFamily = JetBrainsMonoFontFamily,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp,
+                                text = "↑",
+                                fontWeight = FontWeight.Black,
+                                fontSize = 14.sp,
                                 color = Color(0xFF0F172A)
                             )
                             Text(
-                                text = "/100",
-                                fontFamily = JetBrainsMonoFontFamily,
-                                fontWeight = FontWeight.Normal,
-                                fontSize = 10.sp,
-                                color = Color(0xFF64748B)
+                                text = "Start a scan",
+                                fontFamily = PlusJakartaSansFontFamily,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 13.sp,
+                                color = Color(0xFF0F172A)
                             )
                         }
                     }
 
-                    // Score Meta Text
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    Text(
+                        text = "Preview sample >",
+                        color = Color.White,
+                        fontSize = 12.5.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        fontFamily = PlusJakartaSansFontFamily,
+                        modifier = Modifier
+                            .clickable {
+                                onNavigateToDetails(87, "preview_sample", listOf())
+                            }
+                            .padding(4.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(2.dp))
+
+                // ACCEPTS section
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(
+                        text = "ACCEPTS",
+                        color = Color.White.copy(alpha = 0.65f),
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.5.sp,
+                        fontFamily = PlusJakartaSansFontFamily
+                    )
+
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
+                        AcceptsChip(text = "📄 .docx — Word")
+                        AcceptsChip(text = "🔗 Google Docs — share link")
+                        AcceptsChip(text = "📄 + Template — optional")
+                    }
+                }
+            }
+        }
+
+        // =====================================================================
+        // 3. PROCESS CARD: "How It Works"
+        // =====================================================================
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(22.dp))
+                .background(Color.White)
+                .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(22.dp))
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Header
+            Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                Text(
+                    text = "PROCESS",
+                    color = Color(0xFF64748B),
+                    fontSize = 10.5.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = 0.6.sp,
+                    fontFamily = PlusJakartaSansFontFamily
+                )
+                Text(
+                    text = "How It Works",
+                    color = Color(0xFF0F172A),
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = PlusJakartaSansFontFamily
+                )
+                Text(
+                    text = "Four simple steps from manuscript to coherence report.",
+                    color = Color(0xFF64748B),
+                    fontSize = 12.sp,
+                    fontFamily = PlusJakartaSansFontFamily
+                )
+            }
+
+            // Steps Container
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                StepItemCard(
+                    stepNum = "STEP 1",
+                    title = "Upload Manuscript",
+                    description = "Drop your .docx or paste a Google Docs share link.",
+                    iconSymbol = "↑"
+                )
+                StepItemCard(
+                    stepNum = "STEP 2",
+                    title = "Upload Template",
+                    description = "Attach your school's chapter template for better detection.",
+                    iconSymbol = "📄"
+                )
+                StepItemCard(
+                    stepNum = "STEP 3",
+                    title = "Use Credits",
+                    description = "One credit covers a full coherence scan of your manuscript.",
+                    iconSymbol = "💳"
+                )
+                StepItemCard(
+                    stepNum = "STEP 4",
+                    title = "Export Report",
+                    description = "Download your annotated report and fix recommendations.",
+                    iconSymbol = "↓"
+                )
+            }
+
+            // Start your first scan Action Button
+            Button(
+                onClick = onNavigateToNewScan,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                shape = RoundedCornerShape(14.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF2563EB),
+                    contentColor = Color.White
+                )
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text(
+                        text = "↑",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp
+                    )
+                    Text(
+                        text = "Start your first scan",
+                        fontFamily = PlusJakartaSansFontFamily,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp
+                    )
+                }
+            }
+        }
+
+        // =====================================================================
+        // 4. OUTPUTS SECTION: "What You Get Back"
+        // =====================================================================
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(
+                    text = "OUTPUTS",
+                    color = Color(0xFF64748B),
+                    fontSize = 10.5.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = 0.6.sp,
+                    fontFamily = PlusJakartaSansFontFamily
+                )
+                Text(
+                    text = "What You Get Back",
+                    color = Color(0xFF0F172A),
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = PlusJakartaSansFontFamily
+                )
+            }
+
+            // Output Cards
+            OutputCardItem(
+                title = "Coherence Score",
+                description = "A 0-100 integrity score with three sub-scores: logic, consistency, and citations.",
+                iconBg = Color(0xFFEFF6FF),
+                iconColor = Color(0xFF2563EB),
+                iconText = "⏱"
+            )
+
+            OutputCardItem(
+                title = "Annotated Manuscript",
+                description = "Full text with every flagged passage highlighted inline by issue type.",
+                iconBg = Color(0xFFF5F3FF),
+                iconColor = Color(0xFF7C3AED),
+                iconText = "✏️"
+            )
+
+            OutputCardItem(
+                title = "Fix Recommendations",
+                description = "Concrete, actionable rewrites for each flagged issue — ready to apply.",
+                iconBg = Color(0xFFECFDF5),
+                iconColor = Color(0xFF059669),
+                iconText = "!"
+            )
+
+            OutputCardItem(
+                title = "Verified Reference List",
+                description = "Live / dead status for every cited URL and DOI in your bibliography.",
+                iconBg = Color(0xFFFEFCE8),
+                iconColor = Color(0xFFD97706),
+                iconText = "🔗"
+            )
+        }
+
+        // =====================================================================
+        // 5. PREVIEW SAMPLE & RECENT SCANS
+        // =====================================================================
+        // Preview Sample Outline Button
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(46.dp)
+                .clip(RoundedCornerShape(14.dp))
+                .background(Color.White)
+                .border(1.dp, Color(0xFFBFDBFE), RoundedCornerShape(14.dp))
+                .clickable {
+                    onNavigateToDetails(87, "sample_preview", listOf())
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Text(text = "🔍", fontSize = 13.sp)
+                Text(
+                    text = "Preview a sample report",
+                    fontFamily = PlusJakartaSansFontFamily,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp,
+                    color = Color(0xFF2563EB)
+                )
+            }
+        }
+
+        // Recent Scans Section
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Recent Scans",
+                    color = Color(0xFF0F172A),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = PlusJakartaSansFontFamily
+                )
+                Text(
+                    text = "See all",
+                    color = Color(0xFF2563EB),
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = PlusJakartaSansFontFamily,
+                    modifier = Modifier.clickable { onNavigateToHistory() }
+                )
+            }
+
+            // Recent Scan Card
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color.White)
+                    .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(16.dp))
+                    .clickable {
+                        onNavigateToDetails(74, "Capstone_Final_v3.docx", listOf("Methodology Drift", "Sample Size Mismatch"))
+                    }
+                    .padding(14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(38.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(Color(0xFFEFF6FF)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "📄", fontSize = 16.sp)
+                    }
+
+                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                         Text(
-                            text = "Manuscript Integrity",
+                            text = "Capstone_Final_v3.docx",
                             fontFamily = PlusJakartaSansFontFamily,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 15.sp,
+                            fontSize = 13.5.sp,
                             color = Color(0xFF0F172A)
                         )
-
-                        // Status pill
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(4.dp))
-                                .background(progressColor.copy(alpha = 0.08f))
-                                .border(1.dp, progressColor.copy(alpha = 0.2f), RoundedCornerShape(4.dp))
-                                .padding(horizontal = 8.dp, vertical = 2.dp)
-                                .testTag("status_pill")
-                        ) {
-                            Text(
-                                text = lastScan.overallAssessment,
-                                fontFamily = PlusJakartaSansFontFamily,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 11.sp,
-                                color = progressColor
-                            )
-                        }
-
-                        // Created At Timestamp (curated and clean)
-                        val cleanTime = lastScan.createdAt.replace("T", " ").replace("Z", "")
                         Text(
-                            text = "Scanned on $cleanTime",
+                            text = "Score: 74 · 4 issues · 2 days ago",
                             fontFamily = PlusJakartaSansFontFamily,
-                            fontWeight = FontWeight.Normal,
-                            fontSize = 12.sp,
+                            fontSize = 11.5.sp,
                             color = Color(0xFF64748B)
                         )
                     }
                 }
 
-                Divider(color = Color(0xFFF1F5F9))
-
-                // Three Stats Cards Area
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    // Card 1: Issues Flagged
-                    StatCard(
-                        title = "Issues Flagged",
-                        value = "${lastScan.inconsistencies.size}",
-                        accentColor = Color(0xFFF59E0B), // Amber
-                        modifier = Modifier.weight(1f).testTag("stat_card_issues")
-                    )
-
-                    // Card 2: Citations Checked
-                    StatCard(
-                        title = "Citations Checked",
-                        value = "${lastScan.references.size}",
-                        accentColor = Color(0xFF64748B), // Neutral Slate
-                        modifier = Modifier.weight(1f).testTag("stat_card_citations_checked")
-                    )
-
-                    // Card 3: Citations Flagged
-                    val invalidCitationsCount = lastScan.references.count { it.linkStatus != LinkStatus.VALIDATED }
-                    StatCard(
-                        title = "Citations Flagged",
-                        value = "$invalidCitationsCount",
-                        accentColor = Color(0xFF10B981), // Green accent as requested
-                        modifier = Modifier.weight(1f).testTag("stat_card_citations_flagged")
-                    )
-                }
-
-                // View Full Report Navigation
-                Row(
+                // Score Badge Pill
+                Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            // Find corresponding URL from sample or use demo URL
-                            val url = "https://docs.google.com/document/d/demo_manuscript"
-                            onNavigateToDetails(lastScan.coherenceScore, url, lastScan.missingSections)
-                        }
-                        .padding(vertical = 4.dp)
-                        .testTag("view_full_report_button"),
-                    horizontalArrangement = Arrangement.End,
-                    verticalAlignment = Alignment.CenterVertically
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Color(0xFFFEF3C7))
+                        .padding(horizontal = 10.dp, vertical = 6.dp),
+                    contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "View Full Report",
-                        fontFamily = PlusJakartaSansFontFamily,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp,
-                        color = Color(0xFF4F46E5)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Icon(
-                        imageVector = Icons.Default.ArrowForward,
-                        contentDescription = "Arrow Forward",
-                        tint = Color(0xFF4F46E5),
-                        modifier = Modifier.size(16.dp)
+                        text = "74",
+                        color = Color(0xFF854D0E),
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 13.sp
                     )
                 }
             }
         }
 
-        // Document History
+        // =====================================================================
+        // 6. TRANSPARENCY / SCAN LIMITATIONS CARD
+        // =====================================================================
         Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(22.dp))
+                .background(Color.White)
+                .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(22.dp))
+                .padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            Text(
-                text = "Document History",
-                fontFamily = PlayfairDisplayFontFamily,
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
-                color = Color(0xFF0F172A)
-            )
-
-            // Scrollable List of History Items
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("dashboard_history_list"),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+            // Header with Warning Icon
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
             ) {
-                history.forEachIndexed { index, scan ->
-                    val docTitle = "Chapter ${history.size - index}"
-                    val docUrl = "https://docs.google.com/document/d/chapter${history.size - index}"
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(3.dp)
+                ) {
+                    Text(
+                        text = "TRANSPARENCY",
+                        color = Color(0xFF64748B),
+                        fontSize = 10.5.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 0.6.sp,
+                        fontFamily = PlusJakartaSansFontFamily
+                    )
+                    Text(
+                        text = "Scan Limitations",
+                        color = Color(0xFF0F172A),
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = PlusJakartaSansFontFamily
+                    )
+                }
 
-                    val scoreColor = when {
-                        scan.coherenceScore >= 80 -> Color(0xFF10B981)
-                        scan.coherenceScore >= 50 -> Color(0xFFF59E0B)
-                        else -> Color(0xFFF43F5E)
-                    }
-
-                    Surface(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(10.dp))
-                            .clickable {
-                                onNavigateToDetails(scan.coherenceScore, docUrl, scan.missingSections)
-                            }
-                            .testTag("history_item_$index"),
-                        shape = RoundedCornerShape(10.dp),
-                        color = Color.White
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(14.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                Text(
-                                    text = docTitle,
-                                    fontFamily = PlusJakartaSansFontFamily,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 14.sp,
-                                    color = Color(0xFF0F172A)
-                                )
-                                Text(
-                                    text = scan.createdAt.replace("T", " ").replace("Z", ""),
-                                    fontFamily = PlusJakartaSansFontFamily,
-                                    fontWeight = FontWeight.Normal,
-                                    fontSize = 11.sp,
-                                    color = Color(0xFF64748B)
-                                )
-                            }
-
-                            Box(
-                                modifier = Modifier
-                                    .size(38.dp)
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(scoreColor.copy(alpha = 0.08f))
-                                    .border(1.dp, scoreColor.copy(alpha = 0.2f), RoundedCornerShape(8.dp)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = "${scan.coherenceScore}",
-                                    fontFamily = JetBrainsMonoFontFamily,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 13.sp,
-                                    color = scoreColor
-                                )
-                            }
-                        }
-                    }
+                // Soft Warning Icon
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color(0xFFFEF3C7)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = "⚠️", fontSize = 14.sp)
                 }
             }
 
-            // View All navigation button
+            Text(
+                text = "Resync is powerful, but it has boundaries. Here is what it cannot fully handle — so you know what to expect.",
+                color = Color(0xFF64748B),
+                fontSize = 11.5.sp,
+                lineHeight = 16.5.sp,
+                fontFamily = PlusJakartaSansFontFamily
+            )
+
+            // 2x3 Grid of Limitation Cards
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    LimitationGridItem(
+                        modifier = Modifier.weight(1f),
+                        icon = "🖼️",
+                        title = "Images in Manuscript",
+                        desc = "Resync cannot read text inside images — image-embedded content may be flagged or skipped."
+                    )
+                    LimitationGridItem(
+                        modifier = Modifier.weight(1f),
+                        icon = "✏️",
+                        title = "Handwritten Manuscripts",
+                        desc = "Only digital, text-based files can be processed — handwriting is not supported."
+                    )
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    LimitationGridItem(
+                        modifier = Modifier.weight(1f),
+                        icon = "📄",
+                        title = "Scanned PDF Files",
+                        desc = "Image-only scans (photographed pages) cannot be properly processed."
+                    )
+                    LimitationGridItem(
+                        modifier = Modifier.weight(1f),
+                        icon = "📑",
+                        title = "Multi-Column Layouts",
+                        desc = "Multi-column formatting may not be read in the correct reading order."
+                    )
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    LimitationGridItem(
+                        modifier = Modifier.weight(1f),
+                        icon = "🔒",
+                        title = "Private Files",
+                        desc = "Resync cannot access sources behind login walls, paywalls, or private repositories."
+                    )
+                    LimitationGridItem(
+                        modifier = Modifier.weight(1f),
+                        icon = "ℹ️",
+                        title = "Citation Validation",
+                        desc = "Only confirms public accessibility — not full accuracy. Results may vary."
+                    )
+                }
+            }
+
+            // Bottom Banner: "Attach your school template"
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { onNavigateToHistory() }
-                    .padding(vertical = 4.dp)
-                    .testTag("view_all_history_button"),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(Color(0xFFF0F7FF))
+                    .border(1.dp, Color(0xFFBFDBFE), RoundedCornerShape(14.dp))
+                    .padding(14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text(
-                    text = "View All",
-                    fontFamily = PlusJakartaSansFontFamily,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp,
-                    color = Color(0xFF4F46E5)
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Icon(
-                    imageVector = Icons.Default.ArrowForward,
-                    contentDescription = "Arrow Forward",
-                    tint = Color(0xFF4F46E5),
-                    modifier = Modifier.size(16.dp)
-                )
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(Color.White)
+                        .border(1.dp, Color(0xFFBFDBFE), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "ℹ️",
+                        fontSize = 13.sp
+                    )
+                }
+
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    Text(
+                        text = "Attach your school template",
+                        fontFamily = PlusJakartaSansFontFamily,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp,
+                        color = Color(0xFF1E3A8A)
+                    )
+                    Text(
+                        text = "Upload your institution's chapter template so Resync maps headings accurately — significantly improves logic gap detection.",
+                        fontFamily = PlusJakartaSansFontFamily,
+                        fontSize = 11.sp,
+                        lineHeight = 15.sp,
+                        color = Color(0xFF1E3A8A)
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Button(
+                        onClick = onNavigateToNewScan,
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF2563EB),
+                            contentColor = Color.White
+                        ),
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 14.dp, vertical = 4.dp),
+                        modifier = Modifier.height(30.dp)
+                    ) {
+                        Text(
+                            text = "Try it",
+                            fontFamily = PlusJakartaSansFontFamily,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 11.5.sp
+                        )
+                    }
+                }
             }
+        }
+
+        Spacer(modifier = Modifier.height(70.dp)) // Padding for bottom bar
+    }
+}
+
+// -----------------------------------------------------------------------------
+// HELPER COMPOSABLES FOR DASHBOARD
+// -----------------------------------------------------------------------------
+
+@Composable
+fun AcceptsChip(text: String) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(Color.White.copy(alpha = 0.14f))
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+    ) {
+        Text(
+            text = text,
+            color = Color.White,
+            fontSize = 11.sp,
+            fontFamily = PlusJakartaSansFontFamily,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+@Composable
+fun StepItemCard(
+    stepNum: String,
+    title: String,
+    description: String,
+    iconSymbol: String
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(Color(0xFFF8FAFC))
+            .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        // Icon Circle
+        Box(
+            modifier = Modifier
+                .size(38.dp)
+                .clip(CircleShape)
+                .background(Color(0xFFEFF6FF))
+                .border(1.5.dp, Color(0xFF3B82F6), CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = iconSymbol,
+                color = Color(0xFF2563EB),
+                fontWeight = FontWeight.Bold,
+                fontSize = 15.sp
+            )
+        }
+
+        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(
+                text = stepNum,
+                color = Color(0xFF2563EB),
+                fontSize = 10.sp,
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = 0.5.sp,
+                fontFamily = PlusJakartaSansFontFamily
+            )
+            Text(
+                text = title,
+                fontFamily = PlusJakartaSansFontFamily,
+                fontWeight = FontWeight.Bold,
+                fontSize = 13.5.sp,
+                color = Color(0xFF0F172A)
+            )
+            Text(
+                text = description,
+                fontFamily = PlusJakartaSansFontFamily,
+                fontSize = 11.5.sp,
+                lineHeight = 15.sp,
+                color = Color(0xFF64748B)
+            )
         }
     }
 }
 
 @Composable
-fun StatCard(
+fun OutputCardItem(
     title: String,
-    value: String,
-    accentColor: Color,
-    modifier: Modifier = Modifier
+    description: String,
+    iconBg: Color,
+    iconColor: Color,
+    iconText: String
 ) {
-    Surface(
-        modifier = modifier
-            .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(8.dp)),
-        shape = RoundedCornerShape(8.dp),
-        color = Color(0xFFF8FAFC)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color.White)
+            .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(16.dp))
+            .padding(14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(10.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+        Box(
+            modifier = Modifier
+                .size(38.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(iconBg),
+            contentAlignment = Alignment.Center
         ) {
             Text(
-                text = title.uppercase(),
-                fontFamily = PlusJakartaSansFontFamily,
-                fontWeight = FontWeight.Bold,
-                fontSize = 9.sp,
-                color = Color(0xFF64748B),
-                letterSpacing = 0.5.sp,
-                maxLines = 1
-            )
-            Text(
-                text = value,
-                fontFamily = JetBrainsMonoFontFamily,
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
-                color = accentColor
+                text = iconText,
+                color = iconColor,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
             )
         }
+
+        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(
+                text = title,
+                fontFamily = PlusJakartaSansFontFamily,
+                fontWeight = FontWeight.Bold,
+                fontSize = 13.5.sp,
+                color = Color(0xFF0F172A)
+            )
+            Text(
+                text = description,
+                fontFamily = PlusJakartaSansFontFamily,
+                fontSize = 11.5.sp,
+                lineHeight = 15.5.sp,
+                color = Color(0xFF64748B)
+            )
+        }
+    }
+}
+
+@Composable
+fun LimitationGridItem(
+    icon: String,
+    title: String,
+    desc: String,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(14.dp))
+            .background(Color(0xFFF8FAFC))
+            .border(1.dp, Color(0xFFE2E8F0).copy(alpha = 0.6f), RoundedCornerShape(14.dp))
+            .padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(28.dp)
+                .clip(RoundedCornerShape(6.dp))
+                .background(Color.White)
+                .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(6.dp)),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(text = icon, fontSize = 13.sp)
+        }
+
+        Text(
+            text = title,
+            fontFamily = PlusJakartaSansFontFamily,
+            fontWeight = FontWeight.Bold,
+            fontSize = 12.sp,
+            color = Color(0xFF0F172A)
+        )
+
+        Text(
+            text = desc,
+            fontFamily = PlusJakartaSansFontFamily,
+            fontSize = 10.5.sp,
+            lineHeight = 14.5.sp,
+            color = Color(0xFF64748B)
+        )
     }
 }

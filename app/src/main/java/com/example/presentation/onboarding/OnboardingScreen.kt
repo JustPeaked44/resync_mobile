@@ -67,7 +67,8 @@ data class OnboardingSlideData(
 @Composable
 fun OnboardingScreen(
     viewModel: OnboardingViewModel,
-    onNavigateToAuth: () -> Unit,
+    onNavigateToLogin: () -> Unit,
+    onNavigateToSignup: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val pagerState = rememberPagerState(pageCount = { 3 })
@@ -75,7 +76,7 @@ fun OnboardingScreen(
 
     LaunchedEffect(Unit) {
         viewModel.navigationEvent.collect {
-            onNavigateToAuth()
+            onNavigateToSignup()
         }
     }
 
@@ -199,7 +200,7 @@ fun OnboardingScreen(
                         fontFamily = PlusJakartaSansFontFamily,
                         modifier = Modifier
                             .clickable {
-                                viewModel.completeOnboarding()
+                                onNavigateToSignup()
                             }
                             .padding(vertical = 6.dp, horizontal = 4.dp)
                     )
@@ -340,7 +341,7 @@ fun OnboardingScreen(
                                     pagerState.animateScrollToPage(currentPage + 1)
                                 }
                             } else {
-                                viewModel.completeOnboarding()
+                                onNavigateToSignup()
                             }
                         },
                         modifier = Modifier
@@ -376,7 +377,7 @@ fun OnboardingScreen(
                     Row(
                         modifier = Modifier
                             .clickable {
-                                viewModel.completeOnboarding()
+                                onNavigateToLogin()
                             }
                             .padding(vertical = 2.dp),
                         horizontalArrangement = Arrangement.Center,

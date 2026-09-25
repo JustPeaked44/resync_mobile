@@ -49,31 +49,40 @@ fun ResyncNavHost(
             )
         }
 
-        // Onboarding Screen
+        // Onboarding Screen (Slides 1, 2, 3)
         composable(Screen.Onboarding.route) {
             OnboardingScreen(
                 viewModel = onboardingViewModel,
-                onNavigateToAuth = {
-                    navController.navigate(Screen.Auth.route) {
-                        popUpTo(Screen.Onboarding.route) { inclusive = true }
-                    }
+                onNavigateToLogin = {
+                    navController.navigate(Screen.Auth.createRoute(isSignUp = false))
+                },
+                onNavigateToSignup = {
+                    navController.navigate(Screen.Auth.createRoute(isSignUp = true))
                 }
             )
         }
 
         // 2. Auth Screen (Login & Register)
-        composable(Screen.Auth.route) {
+        composable(
+            route = Screen.Auth.route,
+            arguments = listOf(
+                navArgument("isSignUp") {
+                    type = NavType.BoolType
+                    defaultValue = false
+                }
+            )
+        ) { backStackEntry ->
+            val isSignUp = backStackEntry.arguments?.getBoolean("isSignUp") ?: false
             AuthScreen(
                 viewModel = authViewModel,
+                initialIsSignUp = isSignUp,
                 onNavigateToDashboard = {
                     navController.navigate(Screen.DashboardHost.route) {
-                        popUpTo(Screen.Auth.route) { inclusive = true }
+                        popUpTo(Screen.Onboarding.route) { inclusive = true }
                     }
                 },
                 onNavigateBack = {
-                    navController.navigate(Screen.Onboarding.route) {
-                        popUpTo(Screen.Auth.route) { inclusive = true }
-                    }
+                    navController.popBackStack()
                 }
             )
         }

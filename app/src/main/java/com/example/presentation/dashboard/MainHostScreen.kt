@@ -88,60 +88,137 @@ fun MainHostScreen(
         modifier = modifier.fillMaxSize(),
         containerColor = Color(0xFFF8FAFC), // Background Slate (#F8FAFC)
         bottomBar = {
-            NavigationBar(
-                containerColor = Color.White,
-                tonalElevation = 0.dp,
+            Surface(
+                color = Color.White,
+                shadowElevation = 8.dp,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .border(1.dp, Color(0xFFE2E8F0)) // 1dp flat border slate
                     .testTag("bottom_nav_bar")
             ) {
-                val items = listOf(
-                    NavigationItem("Dashboard", "dashboard", Icons.Default.Home, "nav_item_dashboard"),
-                    NavigationItem("New Scan", "new_scan", Icons.Default.Search, "nav_item_new_scan"),
-                    NavigationItem("History", "history", Icons.Default.List, "nav_item_history"),
-                    NavigationItem("Profile", "profile", Icons.Default.Person, "nav_item_profile")
-                )
-
-                items.forEach { item ->
-                    val isSelected = currentRoute == item.route
-                    NavigationBarItem(
-                        selected = isSelected,
-                        onClick = {
-                            if (currentRoute != item.route) {
-                                nestedNavController.navigate(item.route) {
-                                    popUpTo(nestedNavController.graph.startDestinationId) {
-                                        saveState = true
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(68.dp)
+                        .background(Color.White)
+                        .border(1.dp, Color(0xFFE2E8F0)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 40.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // 1. Home Tab
+                        val isHome = currentRoute == "dashboard"
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(3.dp),
+                            modifier = Modifier
+                                .clickable {
+                                    if (!isHome) {
+                                        nestedNavController.navigate("dashboard") {
+                                            popUpTo(nestedNavController.graph.startDestinationId) {
+                                                saveState = true
+                                            }
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        }
                                     }
-                                    launchSingleTop = true
-                                    restoreState = true
                                 }
-                            }
-                        },
-                        icon = {
+                                .padding(horizontal = 14.dp, vertical = 4.dp)
+                        ) {
                             Icon(
-                                imageVector = item.icon,
-                                contentDescription = item.label,
-                                modifier = Modifier.size(24.dp)
+                                imageVector = Icons.Default.Home,
+                                contentDescription = "Home",
+                                tint = if (isHome) Color(0xFF2563EB) else Color(0xFF94A3B8),
+                                modifier = Modifier.size(22.dp)
                             )
-                        },
-                        label = {
                             Text(
-                                text = item.label,
+                                text = "Home",
                                 fontFamily = PlusJakartaSansFontFamily,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                fontSize = 11.sp
+                                fontWeight = if (isHome) FontWeight.Bold else FontWeight.Medium,
+                                fontSize = 11.5.sp,
+                                color = if (isHome) Color(0xFF2563EB) else Color(0xFF94A3B8)
                             )
-                        },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = Color(0xFF4F46E5), // Primary Indigo
-                            selectedTextColor = Color(0xFF4F46E5),
-                            unselectedIconColor = Color(0xFF64748B), // Text Secondary
-                            unselectedTextColor = Color(0xFF64748B),
-                            indicatorColor = Color(0xFF4F46E5).copy(alpha = 0.08f)
-                        ),
-                        modifier = Modifier.testTag(item.testTag)
-                    )
+                        }
+
+                        // 2. Elevated Center Upload Tab
+                        val isUpload = currentRoute == "new_scan"
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(2.dp),
+                            modifier = Modifier
+                                .offset(y = (-10).dp)
+                                .clickable {
+                                    if (!isUpload) {
+                                        nestedNavController.navigate("new_scan") {
+                                            popUpTo(nestedNavController.graph.startDestinationId) {
+                                                saveState = true
+                                            }
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        }
+                                    }
+                                }
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(50.dp)
+                                    .background(Color(0xFF2563EB), CircleShape)
+                                    .border(2.5.dp, Color.White, CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "📄↑",
+                                    color = Color.White,
+                                    fontSize = 17.sp
+                                )
+                            }
+                            Text(
+                                text = "Upload",
+                                fontFamily = PlusJakartaSansFontFamily,
+                                fontWeight = if (isUpload) FontWeight.Bold else FontWeight.Medium,
+                                fontSize = 11.5.sp,
+                                color = if (isUpload) Color(0xFF2563EB) else Color(0xFF64748B)
+                            )
+                        }
+
+                        // 3. Profile Tab
+                        val isProfile = currentRoute == "profile"
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(3.dp),
+                            modifier = Modifier
+                                .clickable {
+                                    if (!isProfile) {
+                                        nestedNavController.navigate("profile") {
+                                            popUpTo(nestedNavController.graph.startDestinationId) {
+                                                saveState = true
+                                            }
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        }
+                                    }
+                                }
+                                .padding(horizontal = 14.dp, vertical = 4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Person,
+                                contentDescription = "Profile",
+                                tint = if (isProfile) Color(0xFF2563EB) else Color(0xFF94A3B8),
+                                modifier = Modifier.size(22.dp)
+                            )
+                            Text(
+                                text = "Profile",
+                                fontFamily = PlusJakartaSansFontFamily,
+                                fontWeight = if (isProfile) FontWeight.Bold else FontWeight.Medium,
+                                fontSize = 11.5.sp,
+                                color = if (isProfile) Color(0xFF2563EB) else Color(0xFF94A3B8)
+                            )
+                        }
+                    }
                 }
             }
         }

@@ -30,19 +30,9 @@ class SplashViewModel(
 
     private fun checkSession() {
         viewModelScope.launch {
-            // Keep splash visible for a duration to show full brand animation
-            delay(2700)
-            val hasCompletedOnboarding = sessionManager.hasCompletedOnboarding.first()
-            if (!hasCompletedOnboarding) {
-                _splashState.value = SplashState.NavigateToOnboarding
-            } else {
-                val isLoggedIn = sessionManager.isLoggedIn.first()
-                if (isLoggedIn) {
-                    _splashState.value = SplashState.NavigateToDashboard
-                } else {
-                    _splashState.value = SplashState.NavigateToAuth
-                }
-            }
+            // Splash animation handles visual duration, default navigation route is onboarding
+            delay(2400)
+            _splashState.value = SplashState.NavigateToOnboarding
         }
     }
 }

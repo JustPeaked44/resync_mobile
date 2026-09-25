@@ -54,13 +54,11 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -70,6 +68,7 @@ import com.example.ui.theme.PlusJakartaSansFontFamily
 @Composable
 fun AuthScreen(
     viewModel: AuthViewModel,
+    initialIsSignUp: Boolean = false,
     onNavigateToDashboard: () -> Unit,
     onNavigateBack: () -> Unit = {},
     modifier: Modifier = Modifier
@@ -80,7 +79,7 @@ fun AuthScreen(
     val scrollState = rememberScrollState()
 
     // Mode: "login" (Welcome back) vs "register" (Create account)
-    var isSignUpMode by remember { mutableStateOf(false) }
+    var isSignUpMode by remember { mutableStateOf(initialIsSignUp) }
 
     // Form fields - Sign In
     var loginEmail by remember { mutableStateOf("") }
@@ -118,7 +117,7 @@ fun AuthScreen(
                 .padding(innerPadding)
                 .statusBarsPadding()
                 .verticalScroll(scrollState)
-                .padding(horizontal = 24.dp, vertical = 12.dp)
+                .padding(horizontal = 22.dp, vertical = 8.dp)
         ) {
             // -----------------------------------------------------------------
             // TOP BAR: Circular Back Button `<` and Centered Brand Logo Lockup
@@ -126,14 +125,14 @@ fun AuthScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 4.dp, bottom = 20.dp),
+                    .padding(top = 2.dp, bottom = 16.dp),
                 contentAlignment = Alignment.Center
             ) {
                 // Back Button on left
                 Box(
                     modifier = Modifier
                         .align(Alignment.CenterStart)
-                        .size(38.dp)
+                        .size(36.dp)
                         .clip(CircleShape)
                         .background(Color(0xFFE2E8F0).copy(alpha = 0.55f))
                         .clickable {
@@ -149,19 +148,19 @@ fun AuthScreen(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
                         tint = Color(0xFF334155),
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(16.dp)
                     )
                 }
 
                 // Centered Resync Logo Lockup
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(7.dp)
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(30.dp)
-                            .clip(RoundedCornerShape(8.dp))
+                            .size(28.dp)
+                            .clip(RoundedCornerShape(7.dp))
                             .background(Color(0xFF2563EB)),
                         contentAlignment = Alignment.Center
                     ) {
@@ -170,21 +169,21 @@ fun AuthScreen(
                             color = Color.White,
                             fontFamily = PlusJakartaSansFontFamily,
                             fontWeight = FontWeight.ExtraBold,
-                            fontSize = 16.sp
+                            fontSize = 15.sp
                         )
                     }
 
                     Text(
                         text = "Resync",
                         color = Color(0xFF0F172A),
-                        fontSize = 17.sp,
+                        fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = PlusJakartaSansFontFamily
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             if (!isSignUpMode) {
                 // =============================================================
@@ -192,21 +191,21 @@ fun AuthScreen(
                 // =============================================================
                 Column(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(22.dp)
+                    verticalArrangement = Arrangement.spacedBy(18.dp)
                 ) {
                     // Title & Subtitle
-                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(
                             text = "Welcome back",
                             fontFamily = PlayfairDisplayFontFamily,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 30.sp,
+                            fontSize = 26.sp,
                             color = Color(0xFF0F172A)
                         )
                         Text(
                             text = "Sign in to access your scans and results.",
                             fontFamily = PlusJakartaSansFontFamily,
-                            fontSize = 13.5.sp,
+                            fontSize = 13.sp,
                             color = Color(0xFF64748B)
                         )
                     }
@@ -214,9 +213,8 @@ fun AuthScreen(
                     // Social Buttons Row
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        // Google Button
                         SocialButton(
                             modifier = Modifier.weight(1f),
                             text = "Google",
@@ -227,7 +225,6 @@ fun AuthScreen(
                             GoogleIcon()
                         }
 
-                        // Facebook Button
                         SocialButton(
                             modifier = Modifier.weight(1f),
                             text = "Facebook",
@@ -243,12 +240,12 @@ fun AuthScreen(
                     AuthDivider(text = "or continue with email")
 
                     // Email Input Field
-                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
                         Text(
                             text = "EMAIL",
                             fontFamily = PlusJakartaSansFontFamily,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 11.5.sp,
+                            fontSize = 11.sp,
                             letterSpacing = 0.5.sp,
                             color = Color(0xFF64748B)
                         )
@@ -259,14 +256,14 @@ fun AuthScreen(
                                 Text(
                                     "you@university.edu.ph",
                                     fontFamily = PlusJakartaSansFontFamily,
-                                    fontSize = 14.sp,
+                                    fontSize = 13.5.sp,
                                     color = Color(0xFF94A3B8)
                                 )
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .testTag("login_email_input"),
-                            shape = RoundedCornerShape(12.dp),
+                            shape = RoundedCornerShape(11.dp),
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Email,
@@ -284,7 +281,7 @@ fun AuthScreen(
                     }
 
                     // Password Input Field
-                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -294,7 +291,7 @@ fun AuthScreen(
                                 text = "PASSWORD",
                                 fontFamily = PlusJakartaSansFontFamily,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 11.5.sp,
+                                fontSize = 11.sp,
                                 letterSpacing = 0.5.sp,
                                 color = Color(0xFF64748B)
                             )
@@ -302,7 +299,7 @@ fun AuthScreen(
                                 text = "Forgot password?",
                                 fontFamily = PlusJakartaSansFontFamily,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 12.sp,
+                                fontSize = 11.5.sp,
                                 color = Color(0xFF2563EB),
                                 modifier = Modifier.clickable {
                                     Toast.makeText(context, "Password reset link sent to registered email.", Toast.LENGTH_SHORT).show()
@@ -317,7 +314,7 @@ fun AuthScreen(
                                 Text(
                                     "••••••••",
                                     fontFamily = PlusJakartaSansFontFamily,
-                                    fontSize = 14.sp,
+                                    fontSize = 13.5.sp,
                                     color = Color(0xFF94A3B8)
                                 )
                             },
@@ -331,7 +328,7 @@ fun AuthScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .testTag("login_password_input"),
-                            shape = RoundedCornerShape(12.dp),
+                            shape = RoundedCornerShape(11.dp),
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Password,
@@ -351,7 +348,7 @@ fun AuthScreen(
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(2.dp))
 
                     // Sign In Button
                     Button(
@@ -363,9 +360,9 @@ fun AuthScreen(
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(52.dp)
+                            .height(48.dp)
                             .testTag("login_submit_button"),
-                        shape = RoundedCornerShape(16.dp),
+                        shape = RoundedCornerShape(14.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF2563EB),
                             contentColor = Color.White
@@ -375,7 +372,7 @@ fun AuthScreen(
                         if (uiState is AuthUiState.Loading) {
                             CircularProgressIndicator(
                                 color = Color.White,
-                                modifier = Modifier.size(22.dp),
+                                modifier = Modifier.size(20.dp),
                                 strokeWidth = 2.dp
                             )
                         } else {
@@ -383,7 +380,7 @@ fun AuthScreen(
                                 text = "Sign In",
                                 fontFamily = PlusJakartaSansFontFamily,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 15.sp
+                                fontSize = 14.5.sp
                             )
                         }
                     }
@@ -392,20 +389,20 @@ fun AuthScreen(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 4.dp),
+                            .padding(top = 2.dp),
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
                             text = "Don't have an account? ",
                             fontFamily = PlusJakartaSansFontFamily,
-                            fontSize = 13.sp,
+                            fontSize = 12.5.sp,
                             color = Color(0xFF64748B)
                         )
                         Text(
                             text = "Sign up",
                             fontFamily = PlusJakartaSansFontFamily,
-                            fontSize = 13.sp,
+                            fontSize = 12.5.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF2563EB),
                             modifier = Modifier.clickable {
@@ -421,21 +418,21 @@ fun AuthScreen(
                 // =============================================================
                 Column(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    verticalArrangement = Arrangement.spacedBy(13.dp)
                 ) {
                     // Title & Subtitle
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
                         Text(
                             text = "Create account",
                             fontFamily = PlayfairDisplayFontFamily,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 30.sp,
+                            fontSize = 26.sp,
                             color = Color(0xFF0F172A)
                         )
                         Text(
                             text = "Free forever. No credit card needed.",
                             fontFamily = PlusJakartaSansFontFamily,
-                            fontSize = 13.5.sp,
+                            fontSize = 13.sp,
                             color = Color(0xFF64748B)
                         )
                     }
@@ -443,9 +440,8 @@ fun AuthScreen(
                     // Social Buttons Row
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        // Google Button
                         SocialButton(
                             modifier = Modifier.weight(1f),
                             text = "Google",
@@ -462,7 +458,6 @@ fun AuthScreen(
                             GoogleIcon()
                         }
 
-                        // Facebook Button
                         SocialButton(
                             modifier = Modifier.weight(1f),
                             text = "Facebook",
@@ -484,12 +479,12 @@ fun AuthScreen(
                     AuthDivider(text = "or fill in the form")
 
                     // FULL NAME Field
-                    Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(
                             text = "FULL NAME",
                             fontFamily = PlusJakartaSansFontFamily,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 11.5.sp,
+                            fontSize = 11.sp,
                             letterSpacing = 0.5.sp,
                             color = Color(0xFF64748B)
                         )
@@ -500,14 +495,14 @@ fun AuthScreen(
                                 Text(
                                     "Juan dela Cruz",
                                     fontFamily = PlusJakartaSansFontFamily,
-                                    fontSize = 14.sp,
+                                    fontSize = 13.5.sp,
                                     color = Color(0xFF94A3B8)
                                 )
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .testTag("register_name_input"),
-                            shape = RoundedCornerShape(12.dp),
+                            shape = RoundedCornerShape(11.dp),
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Text,
@@ -525,12 +520,12 @@ fun AuthScreen(
                     }
 
                     // EMAIL Field
-                    Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(
                             text = "EMAIL",
                             fontFamily = PlusJakartaSansFontFamily,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 11.5.sp,
+                            fontSize = 11.sp,
                             letterSpacing = 0.5.sp,
                             color = Color(0xFF64748B)
                         )
@@ -541,14 +536,14 @@ fun AuthScreen(
                                 Text(
                                     "you@university.edu.ph",
                                     fontFamily = PlusJakartaSansFontFamily,
-                                    fontSize = 14.sp,
+                                    fontSize = 13.5.sp,
                                     color = Color(0xFF94A3B8)
                                 )
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .testTag("register_email_input"),
-                            shape = RoundedCornerShape(12.dp),
+                            shape = RoundedCornerShape(11.dp),
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Email,
@@ -566,12 +561,12 @@ fun AuthScreen(
                     }
 
                     // SCHOOL / UNIVERSITY Field
-                    Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(
                             text = "SCHOOL / UNIVERSITY",
                             fontFamily = PlusJakartaSansFontFamily,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 11.5.sp,
+                            fontSize = 11.sp,
                             letterSpacing = 0.5.sp,
                             color = Color(0xFF64748B)
                         )
@@ -582,14 +577,14 @@ fun AuthScreen(
                                 Text(
                                     "De La Salle University",
                                     fontFamily = PlusJakartaSansFontFamily,
-                                    fontSize = 14.sp,
+                                    fontSize = 13.5.sp,
                                     color = Color(0xFF94A3B8)
                                 )
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .testTag("register_school_input"),
-                            shape = RoundedCornerShape(12.dp),
+                            shape = RoundedCornerShape(11.dp),
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Text,
@@ -607,12 +602,12 @@ fun AuthScreen(
                     }
 
                     // PASSWORD Field
-                    Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(
                             text = "PASSWORD",
                             fontFamily = PlusJakartaSansFontFamily,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 11.5.sp,
+                            fontSize = 11.sp,
                             letterSpacing = 0.5.sp,
                             color = Color(0xFF64748B)
                         )
@@ -623,7 +618,7 @@ fun AuthScreen(
                                 Text(
                                     "Min. 6 characters",
                                     fontFamily = PlusJakartaSansFontFamily,
-                                    fontSize = 14.sp,
+                                    fontSize = 13.5.sp,
                                     color = Color(0xFF94A3B8)
                                 )
                             },
@@ -637,7 +632,7 @@ fun AuthScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .testTag("register_password_input"),
-                            shape = RoundedCornerShape(12.dp),
+                            shape = RoundedCornerShape(11.dp),
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Password,
@@ -661,21 +656,20 @@ fun AuthScreen(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 4.dp),
+                            .padding(vertical = 2.dp),
                         verticalAlignment = Alignment.Top,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        horizontalArrangement = Arrangement.spacedBy(9.dp)
                     ) {
-                        // Custom rounded square checkbox
                         Box(
                             modifier = Modifier
-                                .padding(top = 2.dp)
-                                .size(20.dp)
-                                .clip(RoundedCornerShape(6.dp))
+                                .padding(top = 1.dp)
+                                .size(18.dp)
+                                .clip(RoundedCornerShape(5.dp))
                                 .background(if (agreeToTerms) Color(0xFF2563EB) else Color.White)
                                 .border(
                                     width = 1.5.dp,
                                     color = if (agreeToTerms) Color(0xFF2563EB) else Color(0xFFCBD5E1),
-                                    shape = RoundedCornerShape(6.dp)
+                                    shape = RoundedCornerShape(5.dp)
                                 )
                                 .clickable { agreeToTerms = !agreeToTerms },
                             contentAlignment = Alignment.Center
@@ -685,17 +679,16 @@ fun AuthScreen(
                                     imageVector = Icons.Default.Check,
                                     contentDescription = "Checked",
                                     tint = Color.White,
-                                    modifier = Modifier.size(14.dp)
+                                    modifier = Modifier.size(13.dp)
                                 )
                             }
                         }
 
-                        // Terms and Privacy policy disclaimer
                         Text(
                             text = "I agree to the Terms of Service and Privacy Policy. I understand Resync is a decision-support tool.",
                             fontFamily = PlusJakartaSansFontFamily,
-                            fontSize = 12.sp,
-                            lineHeight = 17.sp,
+                            fontSize = 11.5.sp,
+                            lineHeight = 16.sp,
                             color = Color(0xFF64748B),
                             modifier = Modifier.clickable(
                                 interactionSource = remember { MutableInteractionSource() },
@@ -706,7 +699,7 @@ fun AuthScreen(
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(2.dp))
 
                     // Create My Account Button
                     Button(
@@ -720,9 +713,9 @@ fun AuthScreen(
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(52.dp)
+                            .height(48.dp)
                             .testTag("register_submit_button"),
-                        shape = RoundedCornerShape(16.dp),
+                        shape = RoundedCornerShape(14.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF2563EB),
                             contentColor = Color.White
@@ -732,7 +725,7 @@ fun AuthScreen(
                         if (uiState is AuthUiState.Loading) {
                             CircularProgressIndicator(
                                 color = Color.White,
-                                modifier = Modifier.size(22.dp),
+                                modifier = Modifier.size(20.dp),
                                 strokeWidth = 2.dp
                             )
                         } else {
@@ -740,7 +733,7 @@ fun AuthScreen(
                                 text = "Create My Account",
                                 fontFamily = PlusJakartaSansFontFamily,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 15.sp
+                                fontSize = 14.5.sp
                             )
                         }
                     }
@@ -749,20 +742,20 @@ fun AuthScreen(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 4.dp, bottom = 12.dp),
+                            .padding(top = 2.dp, bottom = 8.dp),
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
                             text = "Already have an account? ",
                             fontFamily = PlusJakartaSansFontFamily,
-                            fontSize = 13.sp,
+                            fontSize = 12.5.sp,
                             color = Color(0xFF64748B)
                         )
                         Text(
                             text = "Sign in",
                             fontFamily = PlusJakartaSansFontFamily,
-                            fontSize = 13.sp,
+                            fontSize = 12.5.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF2563EB),
                             modifier = Modifier.clickable {
@@ -790,12 +783,12 @@ fun SocialButton(
 ) {
     Box(
         modifier = modifier
-            .height(48.dp)
-            .clip(RoundedCornerShape(14.dp))
+            .height(44.dp)
+            .clip(RoundedCornerShape(12.dp))
             .background(Color.White)
-            .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(14.dp))
+            .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(12.dp))
             .clickable { onClick() }
-            .padding(horizontal = 14.dp),
+            .padding(horizontal = 12.dp),
         contentAlignment = Alignment.Center
     ) {
         Row(
@@ -807,7 +800,7 @@ fun SocialButton(
                 text = text,
                 fontFamily = PlusJakartaSansFontFamily,
                 fontWeight = FontWeight.SemiBold,
-                fontSize = 14.sp,
+                fontSize = 13.5.sp,
                 color = Color(0xFF1E293B)
             )
         }
@@ -819,7 +812,7 @@ fun AuthDivider(text: String, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Box(
             modifier = Modifier
@@ -830,7 +823,7 @@ fun AuthDivider(text: String, modifier: Modifier = Modifier) {
         Text(
             text = text,
             fontFamily = PlusJakartaSansFontFamily,
-            fontSize = 12.sp,
+            fontSize = 11.5.sp,
             color = Color(0xFF94A3B8)
         )
         Box(
@@ -850,13 +843,12 @@ fun PasswordEyeToggle(
 ) {
     IconButton(
         onClick = onToggle,
-        modifier = modifier.size(28.dp)
+        modifier = modifier.size(26.dp)
     ) {
-        Canvas(modifier = Modifier.size(18.dp)) {
+        Canvas(modifier = Modifier.size(17.dp)) {
             val w = size.width
             val h = size.height
 
-            // Eye outline
             val cx = w / 2f
             val cy = h / 2f
             drawArc(
@@ -864,34 +856,32 @@ fun PasswordEyeToggle(
                 startAngle = 30f,
                 sweepAngle = 120f,
                 useCenter = false,
-                topLeft = Offset(1.dp.toPx(), cy - 7.dp.toPx()),
-                size = Size(w - 2.dp.toPx(), 14.dp.toPx()),
-                style = Stroke(width = 1.6.dp.toPx(), cap = StrokeCap.Round)
+                topLeft = Offset(1.dp.toPx(), cy - 6.5.dp.toPx()),
+                size = Size(w - 2.dp.toPx(), 13.dp.toPx()),
+                style = Stroke(width = 1.5.dp.toPx(), cap = StrokeCap.Round)
             )
             drawArc(
                 color = Color(0xFF94A3B8),
                 startAngle = 210f,
                 sweepAngle = 120f,
                 useCenter = false,
-                topLeft = Offset(1.dp.toPx(), cy - 7.dp.toPx()),
-                size = Size(w - 2.dp.toPx(), 14.dp.toPx()),
-                style = Stroke(width = 1.6.dp.toPx(), cap = StrokeCap.Round)
+                topLeft = Offset(1.dp.toPx(), cy - 6.5.dp.toPx()),
+                size = Size(w - 2.dp.toPx(), 13.dp.toPx()),
+                style = Stroke(width = 1.5.dp.toPx(), cap = StrokeCap.Round)
             )
 
-            // Pupil
             drawCircle(
                 color = Color(0xFF94A3B8),
-                radius = 3.dp.toPx(),
+                radius = 2.8.dp.toPx(),
                 center = Offset(cx, cy)
             )
 
-            // Strikethrough if not visible
             if (!isVisible) {
                 drawLine(
                     color = Color(0xFF94A3B8),
-                    start = Offset(3.dp.toPx(), 3.dp.toPx()),
-                    end = Offset(w - 3.dp.toPx(), h - 3.dp.toPx()),
-                    strokeWidth = 1.6.dp.toPx(),
+                    start = Offset(2.5.dp.toPx(), 2.5.dp.toPx()),
+                    end = Offset(w - 2.5.dp.toPx(), h - 2.5.dp.toPx()),
+                    strokeWidth = 1.5.dp.toPx(),
                     cap = StrokeCap.Round
                 )
             }
@@ -901,7 +891,7 @@ fun PasswordEyeToggle(
 
 @Composable
 fun GoogleIcon(modifier: Modifier = Modifier) {
-    Canvas(modifier = modifier.size(18.dp)) {
+    Canvas(modifier = modifier.size(17.dp)) {
         val w = size.width
         val h = size.height
         val cx = w / 2f
@@ -910,7 +900,6 @@ fun GoogleIcon(modifier: Modifier = Modifier) {
         val stroke = w * 0.19f
 
         // Google 4-color arcs
-        // Red Top Arc
         drawArc(
             color = Color(0xFFEA4335),
             startAngle = 200f,
@@ -920,7 +909,6 @@ fun GoogleIcon(modifier: Modifier = Modifier) {
             size = Size(r * 2, r * 2),
             style = Stroke(width = stroke, cap = StrokeCap.Butt)
         )
-        // Yellow Left-Bottom Arc
         drawArc(
             color = Color(0xFFFBBC05),
             startAngle = 125f,
@@ -930,7 +918,6 @@ fun GoogleIcon(modifier: Modifier = Modifier) {
             size = Size(r * 2, r * 2),
             style = Stroke(width = stroke, cap = StrokeCap.Butt)
         )
-        // Green Bottom Arc
         drawArc(
             color = Color(0xFF34A853),
             startAngle = 35f,
@@ -940,7 +927,6 @@ fun GoogleIcon(modifier: Modifier = Modifier) {
             size = Size(r * 2, r * 2),
             style = Stroke(width = stroke, cap = StrokeCap.Butt)
         )
-        // Blue Right Arc
         drawArc(
             color = Color(0xFF4285F4),
             startAngle = -25f,
@@ -950,7 +936,6 @@ fun GoogleIcon(modifier: Modifier = Modifier) {
             size = Size(r * 2, r * 2),
             style = Stroke(width = stroke, cap = StrokeCap.Butt)
         )
-        // Blue Crossbar
         drawRect(
             color = Color(0xFF4285F4),
             topLeft = Offset(cx - stroke * 0.2f, cy - stroke * 0.5f),
@@ -963,7 +948,7 @@ fun GoogleIcon(modifier: Modifier = Modifier) {
 fun FacebookIcon(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
-            .size(19.dp)
+            .size(18.dp)
             .clip(CircleShape)
             .background(Color(0xFF1877F2)),
         contentAlignment = Alignment.Center
@@ -973,7 +958,7 @@ fun FacebookIcon(modifier: Modifier = Modifier) {
             color = Color.White,
             fontFamily = PlusJakartaSansFontFamily,
             fontWeight = FontWeight.Black,
-            fontSize = 14.sp,
+            fontSize = 13.5.sp,
             modifier = Modifier.offset(x = 1.dp, y = (-1).dp)
         )
     }

@@ -3,7 +3,11 @@ package com.example.presentation.navigation
 sealed class Screen(val route: String) {
     object Splash : Screen("splash")
     object Onboarding : Screen("onboarding")
-    object Auth : Screen("auth")
+    object Auth : Screen("auth?isSignUp={isSignUp}") {
+        fun createRoute(isSignUp: Boolean = false): String {
+            return "auth?isSignUp=$isSignUp"
+        }
+    }
     object DashboardHost : Screen("dashboard_host")
     object Settings : Screen("settings")
     object ScanComparison : Screen("scan_comparison/{scanIds}") {
