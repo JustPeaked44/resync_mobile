@@ -8,6 +8,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
@@ -35,13 +36,12 @@ import kotlinx.coroutines.launch
 val ResyncBrandBlue = Color(0xFF0010A8)
 
 /**
- * Animated Resync Logo using the exact provided brand asset (R.drawable.resynce_logo).
- * 
- * Animation Stages:
- * 1. Initial State: The exact S-symbol appears pops/fades in directly at the center of the screen.
- * 2. Slide State: The S-symbol smoothly slides to the left, while the stacked "Re\nSync" text
- *    slides out to the right from behind the symbol with an easing curve and alpha fade.
- * 3. Final State: Settles into the exact complete official logo lockup.
+ * Animated Resync Logo sequence using the exact brand asset (R.drawable.resynce_logo).
+ *
+ * Sequence:
+ * 1. Initial State (Image 1): The S logo symbol appears centered on the screen with a clean scale/fade entrance.
+ * 2. Slide State (Image 2): The S logo shifts left as the "Re\nSync" text smoothly slides out and reveals beside it.
+ * 3. Final State (Image 3): The full official logo lockup is complete and centered.
  */
 @Composable
 fun ResyncAnimatedLogo(
@@ -55,7 +55,7 @@ fun ResyncAnimatedLogo(
         if (painter.intrinsicSize.height > 0f) {
             painter.intrinsicSize.width / painter.intrinsicSize.height
         } else {
-            1.15f
+            1.18f
         }
     }
     val effectiveWidth = logoWidth ?: (logoHeight * aspectRatio)
@@ -63,12 +63,12 @@ fun ResyncAnimatedLogo(
 
     val symbolAlpha = remember { Animatable(0f) }
     val symbolScale = remember { Animatable(0.72f) }
-    val slideProgress = remember { Animatable(0f) }
+    val transitionProgress = remember { Animatable(0f) }
 
     // Split masks dividing the brand asset cleanly into the S-symbol and the ReSync typography
     val symbolShape = remember {
         GenericShape { size, _ ->
-            addRect(Rect(0f, 0f, size.width * 0.415f, size.height))
+            addRect(Rect(0f, 0f, size.width * 0.42f, size.height))
         }
     }
     val textShape = remember {
@@ -78,7 +78,7 @@ fun ResyncAnimatedLogo(
     }
 
     LaunchedEffect(Unit) {
-        // Stage 1: S symbol pops into the exact center of the screen
+        // Step 1: Initial S-logo appears centered on the screen
         launch {
             symbolAlpha.animateTo(
                 targetValue = 1f,
@@ -89,64 +89,62 @@ fun ResyncAnimatedLogo(
             targetValue = 1f,
             animationSpec = spring(
                 dampingRatio = Spring.DampingRatioMediumBouncy,
-                stiffness = Spring.StiffnessMediumLow
+                stiffness = Spring.StiffnessLow
             )
         )
 
-        // Hold the centered S symbol
-        delay(450)
+        // Hold the centered S-logo so the user sees the logo first
+        delay(550)
 
-        // Stage 2: S symbol shifts left while ReSync text slides out to the right
-        slideProgress.animateTo(
+        // Step 2: S-logo slides to the left while ReSync text slides out beside the logo
+        transitionProgress.animateTo(
             targetValue = 1f,
             animationSpec = tween(
-                durationMillis = 900,
-                easing = CubicBezierEasing(0.16f, 1f, 0.3f, 1f)
+                durationMillis = 850,
+                easing = CubicBezierEasing(0.18f, 1.0f, 0.22f, 1.0f)
             )
         )
 
-        // Hold the final complete logo
-        delay(600)
+        // Step 3: Hold the full lockup
+        delay(650)
         onAnimationFinish()
     }
 
-    val progress = slideProgress.value
+    val progress = transitionProgress.value
 
-    // When progress = 0: S symbol is shifted +27.5% of width so its center is dead-center in the screen.
-    // When progress = 1: S symbol is at offset 0 (its official left position in the full lockup).
-    val symbolShiftX = (0.275f * (1f - progress)) * effectiveWidth.value
+    // When progress = 0: S-symbol is centered horizontally (center of symbol aligned with center of Box)
+    // S-symbol center in the asset is at ~0.21 * width, Box center is 0.50 * width -> shift is ~0.29 * width
+    val symbolOffsetX = ((effectiveWidth.value * 0.29f) * (1f - progress)).dp
 
-    // Text slides out to the right from behind the S symbol:
-    // When progress = 0: offset is shifted left behind the symbol, alpha = 0.
-    // When progress = 1: offset is 0dp, alpha = 1.
-    val textShiftX = (-0.18f * (1f - progress)) * effectiveWidth.value
+    // ReSync text slides smoothly out from the left (adjacent to S-symbol) to its spot
+    val textSlideOffset = ((-effectiveWidth.value * 0.26f) * (1f - progress)).dp
     val textAlpha = (progress * 1.5f).coerceIn(0f, 1f)
 
     Box(
         modifier = modifier.size(width = effectiveWidth, height = effectiveHeight),
         contentAlignment = Alignment.Center
     ) {
-        // 1. Text Layer ("Re\nSync" sliding out to the right)
-        if (progress > 0.01f) {
+        // 1. Text Layer ("Re\nSync" typography sliding into place beside the logo)
+        if (progress > 0.005f) {
             Image(
                 painter = painter,
                 contentDescription = null,
                 modifier = Modifier
-                    .size(width = effectiveWidth, height = effectiveHeight)
-                    .offset(x = textShiftX.dp)
+                    .fillMaxSize()
+                    .offset(x = textSlideOffset)
                     .alpha(textAlpha)
                     .clip(textShape),
                 contentScale = ContentScale.FillBounds
             )
         }
 
-        // 2. S-Symbol Layer (starts centered, shifts left)
+        // 2. S-Logo Symbol Layer (starts centered on screen, slides left to make room for text)
         Image(
             painter = painter,
             contentDescription = "Resync Logo",
             modifier = Modifier
-                .size(width = effectiveWidth, height = effectiveHeight)
-                .offset(x = symbolShiftX.dp)
+                .fillMaxSize()
+                .offset(x = symbolOffsetX)
                 .scale(symbolScale.value)
                 .alpha(symbolAlpha.value)
                 .clip(symbolShape),
@@ -165,10 +163,10 @@ fun ResyncSymbol(
 ) {
     val symbolShape = remember {
         GenericShape { s, _ ->
-            addRect(Rect(0f, 0f, s.width * 0.415f, s.height))
+            addRect(Rect(0f, 0f, s.width * 0.42f, s.height))
         }
     }
-    val fullWidth = size / 0.32f
+    val fullWidth = size / 0.35f
 
     Box(
         modifier = modifier
@@ -181,8 +179,8 @@ fun ResyncSymbol(
             contentDescription = "Resync Symbol",
             modifier = Modifier
                 .width(fullWidth)
-                .height(size)
-                .offset(x = ((fullWidth.value * 0.275f)).dp)
+                .height(size * 1.15f)
+                .offset(x = (fullWidth.value * 0.29f).dp)
                 .clip(symbolShape),
             contentScale = ContentScale.Fit
         )
@@ -207,3 +205,4 @@ fun ResyncLogo(
         contentScale = ContentScale.Fit
     )
 }
+
